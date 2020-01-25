@@ -44,8 +44,8 @@ library(readr)
   
 #SET-UP PARAMETERS
   
-  COUNT_AS_HOUR_LIMIT <- 18 #This one sets where our day starts. 
-  CONSIDERED_AS_SLEEPING <- 10 #This one sets how many minutes person need to rest to be consedered as resting
+  COUNT_AS_HOUR_LIMIT <- 12 #This one sets where our day starts. 
+  CONSIDERED_AS_SLEEPING <- 90 #This one sets how many minutes person need to rest to be consedered as resting
 
 
 #SUMMARY STATISTICS CALCULATOR.
@@ -87,26 +87,31 @@ summary_statistics_fake_days <- ldply(minbymin_raw_list, function(xframe){
   #Goes through each label (fake days) and calculated summary statistic
   
   summary_dataframe_x <- ddply(date_frame_x_with_labels, ~Days_counter, function(xxframe){
-    colnames_summary_stats <- c("Captured_Minutes", "How_Many_Time_Resting", "How_Long_Resting", "Total_Active", "Total_3_Or_Over","Total_6_Or_Over")
+    colnames_summary_stats <- c("Captured_Minutes", "How_Many_Time_Resting", "How_Long_Resting", "Total_Active", "Total_3_Or_Over","Total_6_Or_Over","Total_Met_Rebased")
     
     number_of_minutes <- dim(xxframe)[1]
     counter_mets_over_3 <- xxframe %>%  dplyr::filter(minute_mets>=3) %>% dplyr::select(minute_mets) %>% as.matrix() %>% length()
     counter_mets_over_6 <- xxframe %>% dplyr::filter(minute_mets>=6) %>% dplyr::select(minute_mets) %>% as.matrix() %>% length()
     counter_mets_over_not_minimum <- xxframe %>% dplyr::filter(minute_mets>1.25) %>% dplyr::select(minute_mets) %>% as.matrix() %>% length()
     
+    total_met_minus_sleep <- sum(xxframe$minute_mets-1.25)
+    
     sleeping_prepare <- xxframe %>% 
       dplyr::filter(minute_mets==1.25, ap_posture==0) %>%
-      mutate(Diff=c(1,diff(time_new))-1) %>%
+      mutate(Diff=c(0,diff(time_new))-1) %>%
       dplyr::select(Diff) %>%
+      mutate(if_else(Diff<=5, 0, Diff)) %>%
       cumsum() %>% 
       table()
     
     sleeping <- c(length(which(sleeping_prepare >=CONSIDERED_AS_SLEEPING)), sum(sleeping_prepare[which(sleeping_prepare >=CONSIDERED_AS_SLEEPING)]))
-  
-    returning_vectors <- c(number_of_minutes, sleeping[1], sleeping[2],counter_mets_over_not_minimum, counter_mets_over_3, counter_mets_over_6)
+    
+    
+    returning_vectors <- c(number_of_minutes, sleeping[1], sleeping[2],counter_mets_over_not_minimum, counter_mets_over_3, counter_mets_over_6,total_met_minus_sleep)
     names(returning_vectors) <- colnames_summary_stats
     return(returning_vectors)
   })
+    
   
   #Just add timestamp of first minute included into "fake day". Gonna helps to maneuvre with data
   summary_dataframe_x[,"First_encountered_moment"] <- (date_frame_x_with_labels %>% 
@@ -119,7 +124,13 @@ summary_statistics_fake_days <- ldply(minbymin_raw_list, function(xframe){
 },.progress="text") %>%
   dplyr::rename(file=.id)
 
-summary_statistics_fake_days <- summary_statistics_fake_days %>% mutate(id=parse_number(file))
+summary_statistics_fake_days <- summary_statistics_fake_days %>% 
+  mutate(id=parse_number(file)) %>%
+  mutate(Week_Day = wday(First_encountered_moment)) %>%
+  left_join(exploratory_data, by="id") %>%
+  mutate(cat_bmi=if_else(age>=55,"Ob","NotOb"))
+  
+
 
 
 
