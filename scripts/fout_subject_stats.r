@@ -58,68 +58,101 @@ for(i in 1:dim(exploratory_data)[1]){
   #ts <- ts[ts$yday > min(ts$yday),]
   
   # compare Mets and steps
-  ggplot(ts, aes(x=minute_steps)) + geom_histogram(bins=100) + 
-    labs(title=title)
-  savefig(paste0("minute_hist_", i), 10, 10)
+  ggplot(ts, aes(x=minute_mets)) + geom_histogram(bins=100) + 
+    labs(title=title) + 
+    geom_vline(xintercept=1.25, color="blue", linetype="dashed", size=1.0) + 
+    geom_vline(xintercept=1.5, color="green", linetype="dashed", size=1.0) + 
+    geom_vline(xintercept=3.0, color="orange", linetype="dashed", size=1.0) +
+    geom_vline(xintercept=6.0, color="red", linetype="dashed", size=1.0)
+  savefig(paste("mets_hist", i, j, sep="_"), 10, 5)
   
-  ggplot(ts, aes(x=step_diff)) + geom_histogram(bins=100) + scale_y_log10() + 
-    labs(title=title)
-  savefig(paste0("steps_hist_", i), 10, 10)
+  ggplot(ts, aes(x=minute_mets, fill=wday)) + geom_histogram(bins=100) + 
+    facet_grid(wday~.) + scale_y_log10() + 
+    labs(title=title) + 
+    geom_vline(xintercept=1.25, color="blue", linetype="dashed", size=1.0) + 
+    geom_vline(xintercept=1.5, color="green", linetype="dashed", size=1.0) + 
+    geom_vline(xintercept=3.0, color="orange", linetype="dashed", size=1.0) +
+    geom_vline(xintercept=6.0, color="red", linetype="dashed", size=1.0)
+  savefig(paste("mets_hist_wday", i, j, sep="_"), 10, 10)
   
+  ggplot(ts, aes(x=minute_mets, fill=wday)) + geom_histogram(bins=100) + 
+    facet_grid(yday~.) + scale_y_log10() + 
+    labs(title=title) + 
+    geom_vline(xintercept=1.25, color="blue", linetype="dashed", size=1.0) + 
+    geom_vline(xintercept=1.5, color="green", linetype="dashed", size=1.0) + 
+    geom_vline(xintercept=3.0, color="orange", linetype="dashed", size=1.0) +
+    geom_vline(xintercept=6.0, color="red", linetype="dashed", size=1.0)
+  savefig(paste("mets_hist_yday", i, j, sep="_"), 10, 30)
+  
+  ggplot(ts, aes(x=step_diff)) + geom_histogram(bins=50) + scale_y_log10() + 
+    labs(title=title)
+  savefig(paste("steps_hist", i, j, sep="_"), 10, 5)
+  
+  ggplot(ts, aes(x=step_diff, fill=wday)) + geom_histogram(bins=50) + scale_y_log10() + 
+    facet_grid(wday~.) + 
+    labs(title=title)
+  savefig(paste("steps_hist_wday", i, j, sep="_"), 10, 10)
+  
+  ggplot(ts, aes(x=step_diff, fill=wday)) + geom_histogram(bins=50) + scale_y_log10() + 
+    facet_grid(yday~.) + 
+    labs(title=title)
+  savefig(paste("steps_hist_yday", i, j, sep="_"), 10, 30)
+    
   ggplot(ts, aes(x=minute_mets, y=step_diff, color=as.factor(ap_posture))) + geom_point(alpha=0.1) + 
     labs(title=title)
-  savefig(paste0("step_vs_met_", i), 10, 10)
+  savefig(paste("step_vs_met", i, j, sep="_"), 10, 10)
   
+
+   
   ggplot(ts, aes(x=dminute, y=minute_mets)) + 
-    geom_line(aes(y=minute_mets), alpha=0.5) + 
+    geom_line(aes(y=minute_mets), alpha=1.0) + 
     labs(title=title)
-  savefig(paste0("daily_met_", i), 50, 10)
+  savefig(paste("daily_met", i, j, "_"), 50, 10)
   
   ggplot(ts, aes(x=dminute, y=minute_mets)) + 
     geom_line(aes(y=minute_mets, color=as.factor(week)), alpha=0.5) + 
     facet_grid(wday2~.) + 
     labs(title=title)
-  savefig(paste0("daily_met_weekday_", i), 10, 10)
+  savefig(paste("daily_met_weekday", i, j, sep="_"), 10, 10)
   
-  ggplot(ts, aes(x=dminute, y=minute_mets)) + 
+  ggplot(ts, aes(x=dminute, y=minute_mets, color=wday)) + 
     geom_line(aes(y=minute_mets)) + 
     facet_grid(yday~.) + 
     labs(title=title)
-  savefig(paste0("daily_met_daily_", i), 10, 10)
+  savefig(paste("daily_met_daily", i, j, sep="_"), 10, 10)
   
   ggplot(ts, aes(x=dminute, y=minute_mets)) + 
-    geom_line(aes(y=step_diff), alpha=0.5) + 
+    geom_line(aes(y=step_diff), alpha=1.0) + 
     labs(title=title)
-  savefig(paste0("daily_step_", i), 50, 10)
+  savefig(paste("daily_step", i, j, sep="_"), 50, 5)
   
   ggplot(ts, aes(x=dminute, y=minute_mets)) + 
     geom_line(aes(y=step_diff, color=as.factor(week)), alpha=0.5) + 
     facet_grid(wday2~.) + 
     labs(title=title)
-  savefig(paste0("daily_step_weekday_", i), 10, 10)
+  savefig(paste("daily_step_weekday", i, j, sep="_"), 10, 10)
   
-  ggplot(ts, aes(x=dminute, y=minute_mets)) + 
+  ggplot(ts, aes(x=dminute, y=minute_mets, color=wday)) + 
     geom_line(aes(y=step_diff)) + 
     facet_grid(yday~.) + 
     labs(title=title)
-  savefig(paste0("daily_step_daily_", i), 10, 10)
+  savefig(paste("daily_step_daily", i, j, sep="_"), 10, 10)
   
-  ggplot(ts, aes(x=dminute, y=minute_mets)) + 
+  ggplot(ts, aes(x=dminute, y=minute_mets, color=wday)) + 
     geom_line(aes(y=ap_posture), alpha=0.5) + 
     labs(title=title)
-  savefig(paste0("daily_posture_", i), 50, 10)
+  savefig(paste("daily_posture", i, j, sep="_"), 50, 10)
   
-  ggplot(ts, aes(x=dminute, y=minute_mets)) + 
+  ggplot(ts, aes(x=dminute, y=minute_mets, color=wday)) + 
     geom_line(aes(y=ap_posture, color=as.factor(week)), alpha=0.5) + 
     facet_grid(wday2~.) +
     labs(title=title)
-  savefig(paste0("daily_posture_weekday_", i), 10, 10)
+  savefig(paste("daily_posture_weekday", i, j, sep="_"), 10, 10)
   
-  ggplot(ts, aes(x=dminute, y=minute_mets)) + 
+  ggplot(ts, aes(x=dminute, y=minute_mets, color=wday)) + 
     geom_line(aes(y=ap_posture)) + 
     facet_grid(yday~.) +
     labs(title=title)
-  savefig(paste0("daily_posture_daily_", i), 10, 10)
-  
+  savefig(paste("daily_posture_daily", i, j, sep="_"), 10, 10)
 }
 
