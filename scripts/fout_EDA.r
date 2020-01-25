@@ -1,4 +1,4 @@
-# Script Purpose: Basic Descriptive Statistics and Visualizations
+# Script Purpose: Loop through each subject and create descriptive statistics
 
 
 
@@ -15,6 +15,7 @@ file <- "minbymin_03.csv"
 ############# Main Code #############
 #####################################
 
+
 {
   ts <- read.csv(file.path("raw_data", file))
   n <- dim(ts)[1]
@@ -29,7 +30,7 @@ file <- "minbymin_03.csv"
   ts$hour <- hour(ts$dt)
   ts$week <- week(ts$dt)
   ts$dminute <- hour(ts$dt)*60 + minute(ts$dt)
-  #ts$dtime <- as.POSIXct(ts$dt, format="%H:%M:%S")
+  ts$dtime <- hms(as.character(ts$dt, format="%H:%M:%S"))
   ts$step_diff <- c(0, diff(ts$minute_steps))
   # there's a big step change in the middle when the device is changed
   # that's the only negative step change, so just floor at zero:
