@@ -87,7 +87,7 @@ summary_statistics_fake_days <- ldply(minbymin_raw_list, function(xframe){
   #Goes through each label (fake days) and calculated summary statistic
   
   summary_dataframe_x <- ddply(date_frame_x_with_labels, ~Days_counter, function(xxframe){
-    colnames_summary_stats <- c("Captured_Minutes", "How_Many_Time_Resting", "How_Long_Resting", "Total_Active", "Total_3_Or_Over","Total_6_Or_Over","Total_Met_Rebased")
+    colnames_summary_stats <- c("Captured_Minutes", "How_Many_Time_Resting", "How_Long_Resting", "Total_Active", "Total_3_Or_Over","Total_6_Or_Over","Total_Met_Rebased", "Total_minutes_posture0","Total_minutes_posture1","Total_minutes_posture2")
     
     number_of_minutes <- dim(xxframe)[1]
     counter_mets_over_3 <- xxframe %>%  dplyr::filter(minute_mets>=3) %>% dplyr::select(minute_mets) %>% as.matrix() %>% length()
@@ -95,6 +95,10 @@ summary_statistics_fake_days <- ldply(minbymin_raw_list, function(xframe){
     counter_mets_over_not_minimum <- xxframe %>% dplyr::filter(minute_mets>1.25) %>% dplyr::select(minute_mets) %>% as.matrix() %>% length()
     
     total_met_minus_sleep <- sum(xxframe$minute_mets-1.25)
+    
+    sitting <- sum(xxframe$ap_posture==0)
+    standing <- sum(xxframe$ap_posture==1)
+    walking <- sum(xxframe$ap_posture==2)
     
     sleeping_prepare <- xxframe %>% 
       dplyr::filter(minute_mets==1.25, ap_posture==0) %>%
@@ -107,7 +111,7 @@ summary_statistics_fake_days <- ldply(minbymin_raw_list, function(xframe){
     sleeping <- c(length(which(sleeping_prepare >=CONSIDERED_AS_SLEEPING)), sum(sleeping_prepare[which(sleeping_prepare >=CONSIDERED_AS_SLEEPING)]))
     
     
-    returning_vectors <- c(number_of_minutes, sleeping[1], sleeping[2],counter_mets_over_not_minimum, counter_mets_over_3, counter_mets_over_6,total_met_minus_sleep)
+    returning_vectors <- c(number_of_minutes, sleeping[1], sleeping[2],counter_mets_over_not_minimum, counter_mets_over_3, counter_mets_over_6,total_met_minus_sleep, sitting, standing, walking)
     names(returning_vectors) <- colnames_summary_stats
     return(returning_vectors)
   })
@@ -128,8 +132,7 @@ summary_statistics_fake_days <- summary_statistics_fake_days %>%
   mutate(id=parse_number(file)) %>%
   mutate(Week_Day = wday(First_encountered_moment)) %>%
   left_join(exploratory_data, by="id") %>%
-  mutate(cat_bmi=if_else(age>=55,"Ob","NotOb")) 
-  
+  dplyr::filter(How_Long_Restin<1200)
 
 
 
