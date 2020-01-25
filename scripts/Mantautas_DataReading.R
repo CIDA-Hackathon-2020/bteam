@@ -44,8 +44,8 @@ library(readr)
   
 #SET-UP PARAMETERS
   
-  COUNT_AS_HOUR_LIMIT <- 12 #This one sets where our day starts. 
-  CONSIDERED_AS_SLEEPING <- 90 #This one sets how many minutes person need to rest to be consedered as resting
+  COUNT_AS_HOUR_LIMIT <- 22 #This one sets where our day starts. 
+  CONSIDERED_AS_SLEEPING <- 60 #This one sets how many minutes person need to rest to be consedered as resting
 
 
 #SUMMARY STATISTICS CALCULATOR.
@@ -128,7 +128,7 @@ summary_statistics_fake_days <- summary_statistics_fake_days %>%
   mutate(id=parse_number(file)) %>%
   mutate(Week_Day = wday(First_encountered_moment)) %>%
   left_join(exploratory_data, by="id") %>%
-  mutate(cat_bmi=if_else(age>=55,"Ob","NotOb"))
+  mutate(cat_bmi=if_else(age>=55,"Ob","NotOb")) 
   
 
 
